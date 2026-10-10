@@ -3,11 +3,12 @@ import { api, inr, num, lakh } from '../api'
 import { go } from '../App'
 import { useLang } from '../i18n'
 import FootfallChart from '../components/FootfallChart'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 const L = {
-  en: { title: 'Stations', sub: 'Footfall, peak hours and inventory for every station on the network.', riders: 'riders / day', weekday: 'Weekday', weekend: 'Weekend', peak: 'Peak', spots: 'Spots at this station', vacant: 'vacant', potential: 'Vacant potential', busiest: 'Busiest observed day', week: 'Daily footfall this week', open: 'Open', none: 'No spots at this station.', mo: '/mo' },
-  hi: { title: 'स्टेशन', sub: 'हर स्टेशन की यात्री संख्या, व्यस्त समय और उपलब्ध जगहें।', riders: 'यात्री / दिन', weekday: 'कार्यदिवस', weekend: 'सप्ताहांत', peak: 'व्यस्त समय', spots: 'इस स्टेशन की जगहें', vacant: 'खाली', potential: 'खाली जगहों से संभावित आय', busiest: 'सबसे व्यस्त दिन', week: 'इस सप्ताह की दैनिक यात्री संख्या', open: 'खोलें', none: 'इस स्टेशन पर कोई जगह नहीं।', mo: '/माह' },
-  gu: { title: 'સ્ટેશન', sub: 'દરેક સ્ટેશનની મુસાફર સંખ્યા, વ્યસ્ત સમય અને ઉપલબ્ધ જગ્યાઓ.', riders: 'મુસાફરો / દિવસ', weekday: 'કામકાજનો દિવસ', weekend: 'સપ્તાહાંત', peak: 'વ્યસ્ત સમય', spots: 'આ સ્ટેશનની જગ્યાઓ', vacant: 'ખાલી', potential: 'ખાલી જગ્યાઓથી સંભવિત આવક', busiest: 'સૌથી વ્યસ્ત દિવસ', week: 'આ અઠવાડિયાની દૈનિક મુસાફર સંખ્યા', open: 'ખોલો', none: 'આ સ્ટેશન પર કોઈ જગ્યા નથી.', mo: '/મહિનો' },
+  en: { title: 'Stations', sub: 'Footfall, peak hours and inventory for every station on the network.', riders: 'riders / day', weekday: 'Weekday', weekend: 'Weekend', peak: 'Peak', spots: 'Spots at this station', vacant: 'vacant', potential: 'Vacant potential', busiest: 'Busiest observed day', week: 'Daily footfall, 1 Jul – 30 Sep 2026', open: 'Open', none: 'No spots at this station.', mo: '/mo' },
+  hi: { title: 'स्टेशन', sub: 'हर स्टेशन की यात्री संख्या, व्यस्त समय और उपलब्ध जगहें।', riders: 'यात्री / दिन', weekday: 'कार्यदिवस', weekend: 'सप्ताहांत', peak: 'व्यस्त समय', spots: 'इस स्टेशन की जगहें', vacant: 'खाली', potential: 'खाली जगहों से संभावित आय', busiest: 'सबसे व्यस्त दिन', week: 'दैनिक यात्री संख्या, 1 जुलाई – 30 सितंबर 2026', open: 'खोलें', none: 'इस स्टेशन पर कोई जगह नहीं।', mo: '/माह' },
+  gu: { title: 'સ્ટેશન', sub: 'દરેક સ્ટેશનની મુસાફર સંખ્યા, વ્યસ્ત સમય અને ઉપલબ્ધ જગ્યાઓ.', riders: 'મુસાફરો / દિવસ', weekday: 'કામકાજનો દિવસ', weekend: 'સપ્તાહાંત', peak: 'વ્યસ્ત સમય', spots: 'આ સ્ટેશનની જગ્યાઓ', vacant: 'ખાલી', potential: 'ખાલી જગ્યાઓથી સંભવિત આવક', busiest: 'સૌથી વ્યસ્ત દિવસ', week: 'દૈનિક મુસાફર સંખ્યા, 1 જુલાઈ – 30 સપ્ટેમ્બર 2026', open: 'ખોલો', none: 'આ સ્ટેશન પર કોઈ જગ્યા નથી.', mo: '/મહિનો' },
 }
 
 export default function Stations() {
@@ -32,8 +33,7 @@ export default function Stations() {
 
   if (error) return <div className="error">{error}</div>
   if (!stations) return <div className="skeleton" style={{ height: 300 }} />
-  const maxDay = Math.max(1, ...(footfall?.daily || []).map((d) => d.total))
-
+  
   return (
     <div className="stack">
       <div>
@@ -73,13 +73,17 @@ export default function Stations() {
             {footfall?.daily && (
               <div className="card">
                 <h3 style={{ marginBottom: 12 }}>{s.week}</h3>
-                {footfall.daily.map((d) => (
-                  <div key={d.date} className="row" style={{ gap: 12, marginBottom: 6 }}>
-                    <span className="mono" style={{ width: 92 }}>{d.date}</span>
-                    <div className="bar" style={{ flex: 1 }}><div style={{ width: `${(d.total / maxDay) * 100}%` }} /></div>
-                    <b style={{ width: 70, textAlign: 'right' }}>{num(d.total)}</b>
-                  </div>
-                ))}
+                <div className="chart-box">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={footfall.daily} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} tick={{ fill: 'var(--muted)', fontSize: 11 }} minTickGap={24} />
+                      <YAxis tick={{ fill: 'var(--muted)', fontSize: 11 }} tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} width={36} />
+                      <Tooltip formatter={(v) => num(v)} labelStyle={{ color: '#202824' }} />
+                      <Bar dataKey="total" fill="var(--forest)" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
                 {footfall.peak_day && <div className="muted small" style={{ marginTop: 8 }}>{s.busiest}: <b>{footfall.peak_day.date}</b> ({num(footfall.peak_day.total)})</div>}
               </div>
             )}

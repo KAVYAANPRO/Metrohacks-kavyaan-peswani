@@ -1,5 +1,7 @@
-// Deterministic synthetic data for SpotValue. Same seed => same numbers every run,
+// Deterministic synthetic data for Yieldline. Same seed => same numbers every run,
 // so the demo is repeatable. Swap with real AFC entry/exit data via POST /api/admin/import.
+
+import { readFileSync } from 'node:fs';
 
 function mulberry32(a) {
   return function () {
@@ -60,6 +62,62 @@ const SIZES = {
   shop: ['120 sqft', '180 sqft', '250 sqft'],
 };
 
+// ---- Daily network level, Jul–Sep 2026 ----
+// Anchors are published GMRC network journeys/day (see DATA_SOURCES.md and data/gmrc_daily.json).
+// Between anchors the routine-weekday level is interpolated linearly; Saturday/Sunday dips follow
+// the published Sunday ratio (24 May 2026: 1.18 lakh vs 1.53 lakh May average, ~0.77).
+const REF_JOURNEYS = 200000; // routine weekday level the station bases above are calibrated to
+const START = Date.UTC(2026, 6, 1); // 1 Jul 2026
+const N_DAYS = 92; // through 30 Sep 2026
+const DOW_FACTOR = { 0: 0.78, 6: 0.9 };
+const BUILTIN_ANCHORS = [
+  ['2026-07-01', 195000],
+  ['2026-08-07', 200436],
+  ['2026-08-10', 203215],
+  ['2026-09-30', 205000],
+];
+
+function loadPublished() {
+  try {
+    return JSON.parse(readFileSync(new URL('./data/gmrc_daily.json', import.meta.url), 'utf8'));
+  } catch {
+    return { points: [], events: [] };
+  }
+}
+
+function buildDays() {
+  const pub = loadPublished();
+  const inRange = (iso) => iso >= '2026-07-01' && iso <= '2026-09-30';
+  const routine = (pub.points || []).filter((p) => inRange(p.date) && (!p.kind || p.kind === 'normal') && p.journeys > 100000);
+  const anchors = new Map(BUILTIN_ANCHORS);
+  for (const p of routine) anchors.set(p.date, p.journeys);
+  const list = [...anchors.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const exact = new Map((pub.points || []).filter((p) => inRange(p.date)).map((p) => [p.date, p]));
+  const events = new Set((pub.events || []).filter((e) => inRange(e.date) && /cricket|concert/i.test(e.type || '')).map((e) => e.date));
+  if (events.size === 0) events.add('2026-09-19'); // illustrative match day so the stadium spike is visible
+  const level = (iso) => {
+    const t = Date.parse(iso);
+    let prev = list[0], next = list[list.length - 1];
+    for (const a of list) { if (Date.parse(a[0]) <= t) prev = a; if (Date.parse(a[0]) >= t) { next = a; break; } }
+    const t0 = Date.parse(prev[0]), t1 = Date.parse(next[0]);
+    return t1 === t0 ? prev[1] : prev[1] + ((next[1] - prev[1]) * (t - t0)) / (t1 - t0);
+  };
+  return Array.from({ length: N_DAYS }, (_, i) => {
+    const date = new Date(START + i * 86400000);
+    const iso = date.toISOString().slice(0, 10);
+    const dow = date.getUTCDay();
+    const base = level(iso);
+    const pinned = exact.get(iso);
+    // When a published figure exists for that exact day, the network factor reproduces it.
+    const netFactor = pinned && !events.has(iso) ? pinned.journeys / base : DOW_FACTOR[dow] ?? 1;
+    return { iso, dow, weekend: dow === 0 || dow === 6, level: base, netFactor, event: events.has(iso), published: pinned?.journeys ?? null };
+  });
+}
+
+function eventWeightSum(weights) {
+  return HOURS.reduce((t, h, i) => t + weights[i] * (h >= 15 && h <= 22 ? (h >= 17 && h <= 21 ? 2.2 : 1.4) : 1), 0);
+}
+
 export function generateSeed() {
   const rnd = mulberry32(42);
   const uniform = (a, b) => a + (b - a) * rnd();
@@ -73,23 +131,25 @@ export function generateSeed() {
     _id: station_type, station_type, age_16_25: a, age_26_40: b, age_40_plus: c, top_segments,
   }));
 
-  // 7 days: Mon 14 Sep 2026 .. Sun 20 Sep 2026. Sat 19 Sep = match day at Motera.
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(Date.UTC(2026, 8, 14 + i));
-    return { iso: d.toISOString().slice(0, 10), weekend: d.getUTCDay() === 0 || d.getUTCDay() === 6 };
-  });
-
+  const days = buildDays();
   const footfall = [];
-  for (const [sid, , , stype, , base] of STATIONS) {
-    const weights = PROFILES[stype];
-    const totalW = weights.reduce((s, w) => s + w, 0);
-    for (const d of days) {
-      const factor = d.weekend ? WEEKEND_FACTOR[stype] : 1;
-      const matchDay = stype === 'stadium' && d.iso === '2026-09-19';
+  const sumBase = STATIONS.reduce((t, st) => t + st[5], 0);
+  for (const d of days) {
+    // Split the network's day-of-week dip across station types: offices empty out on Sundays,
+    // interchanges and the stadium don't. Normalise so the 10 stations follow the network total.
+    const typeF = (stype) => (d.dow === 0 ? WEEKEND_FACTOR[stype] * 0.9 : d.dow === 6 ? (1 + WEEKEND_FACTOR[stype]) / 2 : 1);
+    const raw = STATIONS.reduce((t, st) => t + st[5] * typeF(st[3]), 0);
+    const norm = (sumBase * d.netFactor) / raw;
+    for (const [sid, , , stype, , base] of STATIONS) {
+      const weights = PROFILES[stype];
+      const totalW = weights.reduce((t, w) => t + w, 0);
+      let dayTotal = base * (d.level / REF_JOURNEYS) * typeF(stype) * norm;
+      if (d.event) dayTotal *= stype === 'stadium' ? 3.2 : 1.06;
       HOURS.forEach((h, i) => {
         let wt = weights[i];
-        if (matchDay && h >= 15 && h <= 22) wt *= h >= 17 && h <= 21 ? 4.5 : 2.5;
-        const total = ((base * factor * wt) / totalW) * uniform(0.9, 1.1);
+        if (d.event && stype === 'stadium' && h >= 15 && h <= 22) wt *= h >= 17 && h <= 21 ? 2.2 : 1.4;
+        const share = wt / (d.event && stype === 'stadium' ? eventWeightSum(weights) : totalW);
+        const total = dayTotal * share * uniform(0.93, 1.07);
         let entryShare = 0.5;
         if (stype === 'office' || stype === 'college') entryShare = h < 13 ? 0.35 : 0.65;
         else if (stype === 'residential') entryShare = h < 13 ? 0.65 : 0.35;
@@ -99,14 +159,20 @@ export function generateSeed() {
     }
   }
 
+  // Spots use their own RNG so their ids/types/zones never change when the footfall window changes.
+  const srnd = mulberry32(42);
+  for (let i = 0; i < 1330; i++) srnd();
+  const suniform = (a, b) => a + (b - a) * srnd();
+  const spick = (arr) => arr[Math.floor(srnd() * arr.length)];
+
   const spots = [];
   let n = 1;
   for (const [sid, , , , tier] of STATIONS) {
-    const count = tier === 'A' ? 4 + Math.floor(rnd() * 2) : 3 + Math.floor(rnd() * 3);
+    const count = tier === 'A' ? 4 + Math.floor(srnd() * 2) : 3 + Math.floor(srnd() * 3);
     for (let i = 0; i < count; i++) {
-      const r = rnd();
+      const r = srnd();
       const spot_type = r < 0.55 ? 'ad_panel' : r < 0.8 ? 'kiosk' : 'shop';
-      const zone = pick(spot_type === 'ad_panel' ? ['concourse', 'exit', 'platform', 'corridor'] : ['concourse', 'exit', 'platform']);
+      const zone = spick(spot_type === 'ad_panel' ? ['concourse', 'exit', 'platform', 'corridor'] : ['concourse', 'exit', 'platform']);
       const id = `SP${String(n).padStart(3, '0')}`;
       spots.push({
         _id: id,
@@ -114,9 +180,9 @@ export function generateSeed() {
         station_id: sid,
         spot_type,
         zone,
-        size: pick(SIZES[spot_type]),
-        visibility_score: Math.round(uniform(0.45, 1.0) * 100) / 100,
-        status: rnd() < 0.6 ? 'vacant' : 'occupied',
+        size: spick(SIZES[spot_type]),
+        visibility_score: Math.round(suniform(0.45, 1.0) * 100) / 100,
+        status: srnd() < 0.6 ? 'vacant' : 'occupied',
       });
       n++;
     }

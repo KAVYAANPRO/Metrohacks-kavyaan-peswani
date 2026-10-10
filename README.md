@@ -199,7 +199,7 @@ npm run dev
 
 On Windows you can just double-click **`start.bat`**.
 
-- First start seeds Atlas automatically: 10 stations, 7 days of hourly footfall, 41 spots, 6 roles and the first admin from `.env`.
+- First start seeds Atlas automatically: 10 stations, 92 days (Jul–Sep 2026) of hourly footfall anchored to published GMRC daily totals, 41 spots, 6 roles and the first admin from `.env`.
 - The first admin login asks for a **Gmail address**, where access requests are delivered.
 - For email, create a [Gmail App Password](https://myaccount.google.com/apppasswords) and set `SMTP_USER` / `SMTP_PASS`.
 - No Atlas? Leave `MONGODB_URI` empty and everything runs in-memory.
