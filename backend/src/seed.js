@@ -69,12 +69,13 @@ const SIZES = {
 const REF_JOURNEYS = 200000; // routine weekday level the station bases above are calibrated to
 const START = Date.UTC(2026, 6, 1); // 1 Jul 2026
 const N_DAYS = 92; // through 30 Sep 2026
-const DOW_FACTOR = { 0: 0.78, 6: 0.9 };
+// Weekend dips sized so monthly averages match GMRC monthly totals (Aug 2026 ≈ 1.75 lakh/day vs >2 lakh weekdays).
+const DOW_FACTOR = { 0: 0.6, 6: 0.72 };
 const BUILTIN_ANCHORS = [
   ['2026-07-01', 195000],
   ['2026-08-07', 200436],
   ['2026-08-10', 203215],
-  ['2026-09-30', 205000],
+  ['2026-09-30', 200000],
 ];
 
 function loadPublished() {
