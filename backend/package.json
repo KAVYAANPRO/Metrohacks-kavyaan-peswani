@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "reseed": "node src/reseed.js"
+    "reseed": "node src/reseed.js",
+    "pregen": "node src/pregen.js"
   },
   "engines": {
     "node": ">=18"
