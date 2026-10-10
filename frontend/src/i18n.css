@@ -1,0 +1,26 @@
+/* ===== language switch (sidebar) ===== */
+.lang-switch { display: flex; gap: 4px; padding: 0 12px; }
+.lang-btn { flex: 1; font: inherit; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.72); background: transparent; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--radius, 6px); padding: 6px 0; cursor: pointer; }
+.lang-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.lang-btn.active { color: #163C35; background: #fff; border-color: #fff; }
+.lang-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (max-width: 900px) {
+  .lang-switch { padding: 0; }
+  .lang-btn { padding: 4px 10px; }
+}
+@media print { .lang-block { display: none !important; } }
+
+/* ===== Indic scripts: proper fonts, no negative tracking, taller lines ===== */
+:root[lang='hi'] {
+  --font: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+  --display: 'Manrope', 'Noto Sans Devanagari', 'Inter', system-ui, sans-serif;
+}
+:root[lang='gu'] {
+  --font: 'Inter', 'Noto Sans Gujarati', system-ui, sans-serif;
+  --display: 'Manrope', 'Noto Sans Gujarati', 'Inter', system-ui, sans-serif;
+}
+:root[lang='hi'] body, :root[lang='gu'] body { line-height: 1.6; }
+:root[lang='hi'] :is(h1, h2, h3, .big, .huge, .label, .brand, th),
+:root[lang='gu'] :is(h1, h2, h3, .big, .huge, .label, .brand, th) { letter-spacing: 0; }
+:root[lang='hi'] :is(.label, th), :root[lang='gu'] :is(.label, th) { text-transform: none; font-size: 12px; }
+:root[lang='hi'] :is(h1, h2, h3), :root[lang='gu'] :is(h1, h2, h3) { line-height: 1.35; }
