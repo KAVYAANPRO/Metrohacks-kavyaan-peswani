@@ -11,6 +11,12 @@ export default function Login() {
   const { t } = useLang()
   const [mode, setMode] = useState(() => (window.location.hash.includes('apply') ? 'apply' : 'login'))
 
+  useEffect(() => {
+    const onHash = () => setMode(window.location.hash.includes('apply') ? 'apply' : 'login')
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
   const show = (m) => {
     setMode(m)
     window.location.hash = m === 'apply' ? '/apply' : '/'

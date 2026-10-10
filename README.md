@@ -243,7 +243,7 @@ backend/src
   store.js      MongoDB Atlas + in-memory fallback
   seed.js       calibrated synthetic data
 frontend/src
-  pages/        Dashboard · SpotDetail · PitchView · Admin · Login · About
+  pages/        Dashboard · Stations · SpotDetail · PitchView · Pitches · Admin · Login
   components/   Logo · FootfallChart · AssumptionPanel · ThemeToggle
   i18n.js       English · हिंदी · ગુજરાતી
 ```
@@ -255,3 +255,12 @@ frontend/src
 **Yieldline**: built for DevFest Gandhinagar · Metro Hacks by **Kavyaan Peswani**
 
 </div>
+
+## ☁️ Deploy (Render, free)
+
+The API serves the built React app, so **one service runs everything**.
+
+1. In **MongoDB Atlas → Network Access**, allow `0.0.0.0/0` (Render has no fixed IP on the free plan).
+2. On [render.com](https://render.com): **New + → Blueprint** → pick this repo. It reads [`render.yaml`](render.yaml).
+3. Fill in the secret env vars it asks for: `MONGODB_URI`, `GEMINI_API_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `SMTP_USER`, `SMTP_PASS`, and `APP_URL` (your Render URL).
+4. Deploy. Open the URL and sign in.

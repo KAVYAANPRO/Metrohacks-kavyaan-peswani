@@ -8,6 +8,9 @@ import { HOURS } from './seed.js';
 import { auth, requireAuth, requirePerm as perm, hasPerm } from './auth.js';
 import { publicAuthRoutes, protectedAuthRoutes } from './authRoutes.js';
 import { mailConfigured } from './mailer.js';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 const app = express();
 app.use(cors({ origin: env.CORS_ORIGINS.includes('*') ? true : env.CORS_ORIGINS }));
@@ -216,6 +219,18 @@ api.get('/spots/:id/pitch', perm('pitch.view'), (req, res) => {
 });
 
 api.get('/spots/:id/pitches', perm('pitch.view'), (req, res) => res.json(store.listPitches(req.params.id)));
+api.get('/pitches', perm('pitch.view'), (_req, res) => {
+  const list = [...store.pitches.values()].map((p) => {
+    const spot = store.spots.get(p.spot_id);
+    return {
+      spot_id: p.spot_id, category: p.category, language: p.language || 'en', mode: p.mode, model: p.model,
+      grounded: p.grounding?.passed ?? null, headline: p.pitch?.headline, created_at: p.created_at,
+      station_name: store.stations.get(spot?.station_id)?.name, spot_type: spot?.spot_type, zone: spot?.zone,
+      monthly_price: p.facts?.monthly_price,
+    };
+  });
+  res.json(list.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))));
+});
 
 api.post('/spots/:id/pitch', perm('pitch.generate'), wrap(async (req, res) => {
   const { category = '', force = false, language } = req.body || {};
@@ -288,7 +303,14 @@ api.post('/admin/import/footfall', wrap(async (req, res) => {
 }));
 
 app.use('/api', api);
-app.get('/', (_req, res) => res.json({ name: 'Yieldline API', docs: 'see README.md', health: '/api/health' }));
+// In production the API also serves the built React app (frontend/dist), so one service runs everything.
+const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../frontend/dist');
+if (existsSync(dist)) {
+  app.use(express.static(dist, { index: 'index.html', maxAge: '1h' }));
+  app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
+} else {
+  app.get('/', (_req, res) => res.json({ name: 'Yieldline API', health: '/api/health' }));
+}
 
 app.use((err, _req, res, _next) => {
   console.error('[api]', err);

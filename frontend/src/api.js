@@ -57,6 +57,8 @@ export const api = {
   summary: () => req('/summary'),
   stations: () => req('/stations'),
   footfall: (id) => req(`/stations/${id}/footfall`),
+  station: (id) => req(`/stations/${id}`),
+  pitches: () => req('/pitches'),
   spots: (params = {}) => req('/spots?' + new URLSearchParams(Object.entries(params).filter(([, v]) => v))),
   spot: (id) => req(`/spots/${id}`),
   ratecard: (id) => req(`/spots/${id}/ratecard`),

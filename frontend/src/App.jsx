@@ -7,7 +7,8 @@ import './auth.css'
 import Dashboard from './pages/Dashboard'
 import SpotDetail from './pages/SpotDetail'
 import PitchView from './pages/PitchView'
-import About from './pages/About'
+import Stations from './pages/Stations'
+import Pitches from './pages/Pitches'
 import Login from './pages/Login'
 import Setup from './pages/Setup'
 import Admin, { usePendingCount } from './pages/Admin'
@@ -69,7 +70,8 @@ function Shell() {
   let view
   if (page === 'spot' && id) view = can('spots.view') ? <SpotDetail id={id} /> : <NoAccess />
   else if (page === 'pitch' && id) view = can('pitch.view') ? <PitchView id={id} category={route.query.get('category') || ''} health={health} /> : <NoAccess />
-  else if (page === 'about') view = <About />
+  else if (page === 'stations') view = can('stations.view') ? <Stations /> : <NoAccess />
+  else if (page === 'pitches') view = can('pitch.view') ? <Pitches /> : <NoAccess />
   else if (page === 'admin') view = isAdminUser ? <Admin tab={route.query.get('tab') || ''} /> : <NoAccess />
   else if (!page || page === 'apply') view = canHome ? <Dashboard /> : <WelcomeNoData />
   else view = <NoAccess />
@@ -85,7 +87,8 @@ function Shell() {
             {canHome && <a href="#/" className={!page ? 'active' : ''}>{t('nav.dashboard')}</a>}
             {inSpot && <a href={`#/spot/${id}`} className={page === 'spot' ? 'active' : ''}>{t('nav.ratecard', { id })}</a>}
             {inSpot && can('pitch.view') && <a href={`#/pitch/${id}`} className={page === 'pitch' ? 'active' : ''}>{t('nav.pitch', { id })}</a>}
-            <a href="#/about" className={page === 'about' ? 'active' : ''}>{t('nav.about')}</a>
+            {can('stations.view') && <a href="#/stations" className={page === 'stations' ? 'active' : ''}>{t('nav.stations')}</a>}
+            {can('pitch.view') && <a href="#/pitches" className={page === 'pitches' ? 'active' : ''}>{t('nav.pitches')}</a>}
             {isAdminUser && (
               <a href="#/admin" className={`side-link-badged${page === 'admin' ? ' active' : ''}`}>
                 <span>{t('nav.admin')}</span>
@@ -123,7 +126,7 @@ function WelcomeNoData() {
     <div className="card no-access">
       <h2>{t('access.welcome', { name: user.name || user.username })}</h2>
       <p className="muted">{t('access.noData')}</p>
-      <a className="btn" href="#/about">{t('nav.about')}</a>
+
     </div>
   )
 }

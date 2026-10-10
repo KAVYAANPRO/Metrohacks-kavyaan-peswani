@@ -15,6 +15,8 @@ const en = {
   'nav.ratecard': 'Rate card · {id}',
   'nav.pitch': 'Sales pitch · {id}',
   'nav.about': 'How it works',
+  'nav.stations': 'Stations',
+  'nav.pitches': 'Pitch library',
   'lang.label': 'Language',
 
   // Enumerations
@@ -189,6 +191,8 @@ const hi = {
   'nav.ratecard': 'रेट कार्ड · {id}',
   'nav.pitch': 'सेल्स पिच · {id}',
   'nav.about': 'यह कैसे काम करता है',
+  'nav.stations': 'स्टेशन',
+  'nav.pitches': 'पिच लाइब्रेरी',
   'lang.label': 'भाषा',
 
   'type.ad_panel': 'विज्ञापन पैनल', 'type.kiosk': 'कियोस्क', 'type.shop': 'दुकान',
@@ -357,6 +361,8 @@ const gu = {
   'nav.ratecard': 'રેટ કાર્ડ · {id}',
   'nav.pitch': 'સેલ્સ પિચ · {id}',
   'nav.about': 'આ કેવી રીતે કામ કરે છે',
+  'nav.stations': 'સ્ટેશન',
+  'nav.pitches': 'પિચ લાઇબ્રેરી',
   'lang.label': 'ભાષા',
 
   'type.ad_panel': 'જાહેરાત પેનલ', 'type.kiosk': 'કિઓસ્ક', 'type.shop': 'દુકાન',
