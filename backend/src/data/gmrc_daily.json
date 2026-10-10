@@ -1,0 +1,43 @@
+{
+  "unit": "journeys per day, whole network",
+  "points": [
+    {"date": "2025-01-11", "journeys": 117838, "kind": "weekend", "note": "Saturday baseline before Coldplay (Patrika table, partly garbled)", "source": "https://www.patrika.com/ahmedabad-news/c-19351080", "published": "2025-01-27"},
+    {"date": "2025-01-12", "journeys": 101703, "kind": "sunday", "note": "Sunday baseline (Patrika table, partly garbled)", "source": "https://www.patrika.com/ahmedabad-news/c-19351080", "published": "2025-01-27"},
+    {"date": "2025-01-18", "journeys": 116989, "kind": "weekend", "note": "Saturday baseline (Patrika table, partly garbled)", "source": "https://www.patrika.com/ahmedabad-news/c-19351080", "published": "2025-01-27"},
+    {"date": "2025-01-19", "journeys": 92066, "kind": "sunday", "note": "Sunday baseline (Patrika table, partly garbled)", "source": "https://www.patrika.com/ahmedabad-news/c-19351080", "published": "2025-01-27"},
+    {"date": "2025-01-25", "journeys": 213735, "kind": "event", "note": "Coldplay concert day 1, Motera (Saturday)", "source": "https://www.patrika.com/ahmedabad-news/c-19351080", "published": "2025-01-27"},
+    {"date": "2025-01-26", "journeys": 191529, "kind": "event", "note": "Coldplay concert day 2, Motera (Sunday, Republic Day); govt release gives 2-day total over 4.11 lakh", "source": "https://www.patrika.com/ahmedabad-news/c-19351080", "published": "2025-01-27"},
+    {"date": "2026-02-18", "journeys": 221000, "kind": "event", "note": "T20 World Cup match, Motera; source says over 2.21 lakh (exact 2,21,066 not verified)", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/", "published": "2026-06-10"},
+    {"date": "2026-04-30", "journeys": 226000, "kind": "event", "note": "IPL match, Motera; more than 2.26 lakh", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/", "published": "2026-06-10"},
+    {"date": "2026-05-21", "journeys": 222000, "kind": "event", "note": "IPL match, Motera; over 2.22 lakh", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/", "published": "2026-06-10"},
+    {"date": "2026-05-24", "journeys": 117939, "kind": "sunday", "note": "Sunday; Phase 1 103545 + Phase 2 14394", "source": "https://www.ap7am.com/en/128330/gujarat-ipl-final-drives-66-pc-surge-in-ahmedabad-metro-ridership", "published": "2026-06-02"},
+    {"date": "2026-05-31", "journeys": 195868, "kind": "event", "note": "IPL final, Motera (Sunday); Phase 1 177106 + Phase 2 18762; service ran till 02:19 with 62 extra trips", "source": "https://www.ap7am.com/en/128330/gujarat-ipl-final-drives-66-pc-surge-in-ahmedabad-metro-ridership", "published": "2026-06-02"},
+    {"date": "2026-07-23", "journeys": 195522, "kind": "normal", "note": "Thursday, heavy rain; a same-day DeshGujarat report said about 1.75 lakh (conflict)", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-07-28", "journeys": 195210, "kind": "normal", "note": "Tuesday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-07-29", "journeys": 198162, "kind": "normal", "note": "Wednesday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-07-30", "journeys": 194904, "kind": "normal", "note": "Thursday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-08-03", "journeys": 199789, "kind": "normal", "note": "Monday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-08-04", "journeys": 198131, "kind": "normal", "note": "Tuesday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-08-05", "journeys": 196561, "kind": "normal", "note": "Wednesday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-08-06", "journeys": 199339, "kind": "normal", "note": "Thursday", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-08-07", "journeys": 200436, "kind": "normal", "note": "Friday; first non-event day above 2 lakh", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"},
+    {"date": "2026-08-10", "journeys": 203215, "kind": "normal", "note": "Monday; highest non-event day reported", "source": "https://deshgujarat.com/2026/08/14/ahmedabad-metro-ridership-touches-2-lakh-daily-mark/", "published": "2026-08-14"}
+  ],
+  "monthly_avg": [
+    {"month": "2023", "journeys": 69000, "note": "calendar-year average daily (Govt of Gujarat release)", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/"},
+    {"month": "2024", "journeys": 101000, "note": "calendar-year average daily", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/"},
+    {"month": "2025", "journeys": 133000, "note": "calendar-year average daily", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/"},
+    {"month": "2026-05", "journeys": 153000, "note": "average daily ridership by May 2026", "source": "https://thedailyguardian.com/india/ahmedabad-metro-becoming-model-of-modern-public-transport-with-6828-km-network-and-54-stations20260610235641-710435/"},
+    {"month": "2026-08", "journeys": 175129, "note": "DERIVED: monthly total 54.29 lakh / 31 days (record month)", "source": "https://english.gujaratsamachar.com/news/ahmedabad/from-35000-to-2-lakh-daily-passengersahmedabad-metro-records-1586-crore-passengers-in-4-years-wiht-37811832505"},
+    {"month": "2026-09", "journeys": 176867, "note": "DERIVED: monthly total 53.06 lakh / 30 days", "source": "https://english.gujaratsamachar.com/news/ahmedabad/from-35000-to-2-lakh-daily-passengersahmedabad-metro-records-1586-crore-passengers-in-4-years-wiht-37811832505"}
+  ],
+  "events": [
+    {"date": "2025-01-25", "type": "concert", "venue": "Motera", "note": "Coldplay day 1; 2,13,735 journeys", "source": "https://www.patrika.com/ahmedabad-news/c-19351080"},
+    {"date": "2025-01-26", "type": "concert", "venue": "Motera", "note": "Coldplay day 2; 1,91,529 journeys", "source": "https://www.patrika.com/ahmedabad-news/c-19351080"},
+    {"date": "2026-02-18", "type": "cricket", "venue": "Motera", "note": "T20 World Cup match; over 2.21 lakh", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/"},
+    {"date": "2026-03-08", "type": "cricket", "venue": "Motera", "note": "T20 World Cup final IND v NZ; metro extended to 00:30; no ridership figure found", "source": "https://www.newsonair.gov.in/railways-to-run-special-train-in-view-of-t20-world-cup-final-to-be-held-in-ahmedabad-tomorrow"},
+    {"date": "2026-04-30", "type": "cricket", "venue": "Motera", "note": "IPL match; over 2.26 lakh", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/"},
+    {"date": "2026-05-21", "type": "cricket", "venue": "Motera", "note": "IPL match; over 2.22 lakh", "source": "https://deshgujarat.com/2026/06/10/ahmedabad-gandhinagar-metro-crosses-13-81-crore-passengers-daily-ridership-nears-1-6-lakh/"},
+    {"date": "2026-05-31", "type": "cricket", "venue": "Motera", "note": "IPL final; 1,95,868 journeys (+66% vs prior Sunday)", "source": "https://www.ap7am.com/en/128330/gujarat-ipl-final-drives-66-pc-surge-in-ahmedabad-metro-ridership"}
+  ]
+}

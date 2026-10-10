@@ -153,3 +153,35 @@ curl -X POST http://localhost:8000/api/admin/import/footfall \
 ```
 
 To return to the synthetic demo data, use `POST /api/admin/reseed`.
+
+## Daily ridership time series
+
+These are real, dated GMRC whole-network figures taken from press reports. They are stored in `backend/src/data/gmrc_daily.json`. Values reported as "over X lakh" are recorded as X. No per-day figures were found for September 2026. Prasar Bharati (newsonair.gov.in) published no ridership numbers; it only reported metro service extensions.
+
+| Date | Journeys | Source |
+|---|---|---|
+| 2025-01-11 (Sat) | 117,838 | Patrika, 27 Jan 2025 |
+| 2025-01-12 (Sun) | 101,703 | Patrika |
+| 2025-01-18 (Sat) | 116,989 | Patrika |
+| 2025-01-19 (Sun) | 92,066 | Patrika |
+| 2025-01-25 Coldplay | 213,735 | Patrika |
+| 2025-01-26 Coldplay | 191,529 | Patrika |
+| 2026-02-18 T20 WC | >221,000 | DeshGujarat, 10 Jun 2026 (Govt release) |
+| 2026-04-30 IPL | >226,000 | DeshGujarat, 10 Jun 2026 |
+| 2026-05-21 IPL | >222,000 | DeshGujarat, 10 Jun 2026 |
+| 2026-05-24 (Sun) | 117,939 (P1 103,545 + P2 14,394) | IANS via ap7am, 2 Jun 2026 |
+| 2026-05-31 IPL final | 195,868 (P1 177,106 + P2 18,762) | IANS via ap7am, 2 Jun 2026 |
+| 2026-07-23 | 195,522 (a same-day report said ~1.75 lakh) | DeshGujarat, 14 Aug 2026 |
+| 2026-07-28 | 195,210 | DeshGujarat, 14 Aug 2026 |
+| 2026-07-29 | 198,162 | DeshGujarat, 14 Aug 2026 |
+| 2026-07-30 | 194,904 | DeshGujarat, 14 Aug 2026 |
+| 2026-08-03 | 199,789 | DeshGujarat, 14 Aug 2026 |
+| 2026-08-04 | 198,131 | DeshGujarat, 14 Aug 2026 |
+| 2026-08-05 | 196,561 | DeshGujarat, 14 Aug 2026 |
+| 2026-08-06 | 199,339 | DeshGujarat, 14 Aug 2026 |
+| 2026-08-07 | 200,436 | DeshGujarat, 14 Aug 2026 |
+| 2026-08-10 | 203,215 | DeshGujarat, 14 Aug 2026 |
+
+**Average daily ridership** (Govt of Gujarat, 10 Jun 2026): 69k in 2023, 1.01 lakh in 2024, 1.33 lakh in 2025, and 1.53 lakh by May 2026.
+
+**Monthly totals** (Gujarat Samachar, 1 Oct 2026): 54.29 lakh in Aug 2026 (the record month) and 53.06 lakh in Sep 2026. That works out to about 1.75 and 1.77 lakh per day. The financial year Oct 2025 to Sep 2026 totalled 525.36 lakh.
