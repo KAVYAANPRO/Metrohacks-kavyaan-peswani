@@ -243,7 +243,7 @@ backend/src
   store.js      MongoDB Atlas + in-memory fallback
   seed.js       calibrated synthetic data
 frontend/src
-  pages/        Dashboard · Stations · SpotDetail · PitchView · Pitches · Admin · Login
+  pages/        Dashboard · Stations · SpotDetail · PitchView · Pitches · Compare · Settings · Admin · Login
   components/   Logo · FootfallChart · AssumptionPanel · ThemeToggle
   i18n.js       English · हिंदी · ગુજરાતી
 ```

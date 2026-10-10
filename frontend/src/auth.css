@@ -184,3 +184,12 @@ fieldset:disabled .perm-item, fieldset:disabled .perm-all { cursor: default; }
   .row-actions { justify-content: flex-start; }
 }
 @media print { .modal-backdrop, .user-card, .user-actions { display: none !important; } }
+
+/* ===== dashboard extras: impact strip, compare bar ===== */
+.impact { display: grid; grid-template-columns: 1fr auto 1fr 1fr 1fr; gap: 20px; align-items: center; border-left: 3px solid var(--orange); }
+.impact-arrow { font-size: 28px; color: var(--muted); }
+.impact-uplift { text-align: center; border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 0 12px; }
+.impact-uplift .huge { font-size: 40px; }
+@media (max-width: 960px) { .impact { grid-template-columns: 1fr 1fr; } .impact-arrow { display: none; } .impact-uplift { border: none; text-align: left; padding: 0; } }
+.compare-bar { position: sticky; bottom: 16px; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border-strong); border-left: 3px solid var(--orange); border-radius: var(--radius); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12); }
+@media print { .compare-bar { display: none; } }

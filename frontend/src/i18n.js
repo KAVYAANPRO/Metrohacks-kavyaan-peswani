@@ -16,6 +16,7 @@ const en = {
   'nav.pitch': 'Sales pitch · {id}',
   'nav.about': 'How it works',
   'nav.stations': 'Stations',
+  'nav.settings': 'Settings',
   'nav.pitches': 'Pitch library',
   'lang.label': 'Language',
 
@@ -192,6 +193,7 @@ const hi = {
   'nav.pitch': 'सेल्स पिच · {id}',
   'nav.about': 'यह कैसे काम करता है',
   'nav.stations': 'स्टेशन',
+  'nav.settings': 'सेटिंग्स',
   'nav.pitches': 'पिच लाइब्रेरी',
   'lang.label': 'भाषा',
 
@@ -362,6 +364,7 @@ const gu = {
   'nav.pitch': 'સેલ્સ પિચ · {id}',
   'nav.about': 'આ કેવી રીતે કામ કરે છે',
   'nav.stations': 'સ્ટેશન',
+  'nav.settings': 'સેટિંગ્સ',
   'nav.pitches': 'પિચ લાઇબ્રેરી',
   'lang.label': 'ભાષા',
 
@@ -525,7 +528,7 @@ const gu = {
 
 /* ===== Sign-in, roles & admin panel ===== */
 const enAuth = {
-  'nav.admin': 'Admin',
+  'nav.admin': 'Team & access',
   'nav.pendingTitle': '{n} access requests waiting',
   'nav.signOut': 'Sign out',
   'nav.changePw': 'Change password',
@@ -614,7 +617,7 @@ const enAuth = {
   'ap.readOnly': 'View only', 'ap.readOnlyHint': 'Only roles with “Edit pricing assumptions” can change these.',
   'ap.on': 'On', 'ap.off': 'Off',
 
-  'admin.title': 'Admin',
+  'admin.title': 'Team & access',
   'admin.subtitle': 'People, roles and access requests.',
   'admin.tabUsers': 'Users', 'admin.tabRoles': 'Roles & permissions', 'admin.tabRequests': 'Access requests',
   'admin.users': 'Users', 'admin.addUser': 'Add user', 'admin.noUsers': 'No users yet.',
@@ -694,7 +697,7 @@ const enAuth = {
 }
 
 const hiAuth = {
-  'nav.admin': 'एडमिन',
+  'nav.admin': 'टीम और एक्सेस',
   'nav.pendingTitle': '{n} अनुरोध बाकी',
   'nav.signOut': 'साइन आउट',
   'nav.changePw': 'पासवर्ड बदलें',
@@ -783,7 +786,7 @@ const hiAuth = {
   'ap.readOnly': 'सिर्फ़ देखने के लिए', 'ap.readOnlyHint': 'इन्हें सिर्फ़ “दाम की धारणाएँ बदलें” अनुमति वाली भूमिकाएँ बदल सकती हैं।',
   'ap.on': 'चालू', 'ap.off': 'बंद',
 
-  'admin.title': 'एडमिन',
+  'admin.title': 'टीम और एक्सेस',
   'admin.subtitle': 'लोग, भूमिकाएँ और खाते के अनुरोध।',
   'admin.tabUsers': 'उपयोगकर्ता', 'admin.tabRoles': 'भूमिकाएँ और अनुमतियाँ', 'admin.tabRequests': 'खाते के अनुरोध',
   'admin.users': 'उपयोगकर्ता', 'admin.addUser': 'उपयोगकर्ता जोड़ें', 'admin.noUsers': 'अभी कोई उपयोगकर्ता नहीं।',
@@ -863,7 +866,7 @@ const hiAuth = {
 }
 
 const guAuth = {
-  'nav.admin': 'એડમિન',
+  'nav.admin': 'ટીમ અને ઍક્સેસ',
   'nav.pendingTitle': '{n} વિનંતી બાકી',
   'nav.signOut': 'સાઇન આઉટ',
   'nav.changePw': 'પાસવર્ડ બદલો',
@@ -952,7 +955,7 @@ const guAuth = {
   'ap.readOnly': 'ફક્ત જોવા માટે', 'ap.readOnlyHint': 'આને ફક્ત “ભાવની ધારણાઓ બદલો” પરવાનગીવાળી ભૂમિકાઓ બદલી શકે.',
   'ap.on': 'ચાલુ', 'ap.off': 'બંધ',
 
-  'admin.title': 'એડમિન',
+  'admin.title': 'ટીમ અને ઍક્સેસ',
   'admin.subtitle': 'લોકો, ભૂમિકાઓ અને ખાતાની વિનંતીઓ.',
   'admin.tabUsers': 'વપરાશકર્તા', 'admin.tabRoles': 'ભૂમિકાઓ અને પરવાનગીઓ', 'admin.tabRequests': 'ખાતાની વિનંતીઓ',
   'admin.users': 'વપરાશકર્તા', 'admin.addUser': 'વપરાશકર્તા ઉમેરો', 'admin.noUsers': 'હજુ કોઈ વપરાશકર્તા નથી.',

@@ -9,12 +9,12 @@ import SpotDetail from './pages/SpotDetail'
 import PitchView from './pages/PitchView'
 import Stations from './pages/Stations'
 import Pitches from './pages/Pitches'
+import Compare from './pages/Compare'
+import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Setup from './pages/Setup'
 import Admin, { usePendingCount } from './pages/Admin'
-import ThemeToggle from './components/ThemeToggle'
 import Logo from './components/Logo'
-import ChangePassword from './components/ChangePassword'
 
 function parseHash() {
   const [path, query = ''] = window.location.hash.replace(/^#/, '').split('?')
@@ -45,10 +45,9 @@ function Gate() {
 
 function Shell() {
   const { t } = useLang()
-  const { user, can, logout } = useAuth()
+  const { user, can } = useAuth()
   const [route, setRoute] = useState(parseHash())
   const [health, setHealth] = useState(null)
-  const [changePw, setChangePw] = useState(false)
   const isAdminUser = can('users.manage') || can('roles.manage') || can('applications.review')
   const pending = usePendingCount(can('applications.review'))
 
@@ -71,6 +70,8 @@ function Shell() {
   if (page === 'spot' && id) view = can('spots.view') ? <SpotDetail id={id} /> : <NoAccess />
   else if (page === 'pitch' && id) view = can('pitch.view') ? <PitchView id={id} category={route.query.get('category') || ''} health={health} /> : <NoAccess />
   else if (page === 'stations') view = can('stations.view') ? <Stations /> : <NoAccess />
+  else if (page === 'settings') view = <Settings />
+  else if (page === 'compare') view = can('spots.view') ? <Compare ids={(route.query.get('ids') || '').split(',').filter(Boolean)} /> : <NoAccess />
   else if (page === 'pitches') view = can('pitch.view') ? <Pitches /> : <NoAccess />
   else if (page === 'admin') view = isAdminUser ? <Admin tab={route.query.get('tab') || ''} /> : <NoAccess />
   else if (!page || page === 'apply') view = canHome ? <Dashboard /> : <WelcomeNoData />
@@ -95,26 +96,21 @@ function Shell() {
                 {pending > 0 && <span className="count-badge" title={t('nav.pendingTitle', { n: pending })}>{pending}</span>}
               </a>
             )}
+            <a href="#/settings" className={page === 'settings' ? 'active' : ''}>{t('nav.settings')}</a>
           </nav>
         </div>
-        <LangSwitch />
         <div className="side-status">
-          <ThemeToggle />
-          <div className="user-card">
+          <a href="#/settings" className={`user-card${page === 'settings' ? ' active' : ''}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="user-avatar" aria-hidden="true">{(user.name || user.username || '?').trim().charAt(0).toUpperCase()}</div>
             <div className="user-meta">
               <div className="user-name" title={user.username}>{user.name || user.username}</div>
               <span className="user-role">{user.role?.name || '—'}</span>
             </div>
-          </div>
-          <div className="user-actions">
-            <button type="button" className="side-btn" onClick={() => setChangePw(true)}>{t('nav.changePw')}</button>
-            <button type="button" className="side-btn" onClick={logout}>{t('nav.signOut')}</button>
-          </div>
+            <span aria-hidden="true" style={{ marginLeft: 'auto', opacity: 0.7 }}>⚙</span>
+          </a>
         </div>
       </aside>
       <main className="page">{view}</main>
-      {changePw && <ChangePassword onClose={() => setChangePw(false)} />}
     </div>
   )
 }

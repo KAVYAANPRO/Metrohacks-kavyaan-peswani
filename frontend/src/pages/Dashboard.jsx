@@ -5,7 +5,7 @@ import { useLang } from '../i18n'
 import { useAuth } from '../auth'
 
 export default function Dashboard() {
-  const { t, tx } = useLang()
+  const { t, tx, lang } = useLang()
   const { can } = useAuth()
   const showRevenue = can('dashboard.view')
   const showStations = can('stations.view')
@@ -21,6 +21,9 @@ export default function Dashboard() {
   const [tierFilter, setTierFilter] = useState('')
   const [status, setStatus] = useState('vacant')
   const [q, setQ] = useState('')
+  const [picked, setPicked] = useState([])
+  const togglePick = (id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id].slice(-3)))
+  const X = EXTRA[lang] || EXTRA.en
 
   useEffect(() => {
     Promise.all([showRevenue ? api.summary() : null, showStations ? api.stations() : []])
@@ -94,6 +97,49 @@ export default function Dashboard() {
         </>}
       </section>}
 
+      {showRevenue && summary.occupied_estimated_monthly > 0 && (
+        <section className="card impact">
+          <div>
+            <div className="label">{X.today}</div>
+            <div className="big">{lakh(summary.occupied_estimated_monthly)}<span className="muted small">{t('dash.perMo')}</span></div>
+            <div className="muted small">{X.fromFilled.replace('{n}', summary.occupied_count)}</div>
+          </div>
+          <div className="impact-arrow">→</div>
+          <div>
+            <div className="label">{X.withAll}</div>
+            <div className="big">{lakh(summary.occupied_estimated_monthly + summary.vacant_potential_monthly)}<span className="muted small">{t('dash.perMo')}</span></div>
+            <div className="muted small">{X.allSpots.replace('{n}', summary.total_spots)}</div>
+          </div>
+          <div className="impact-uplift">
+            <div className="huge money">+{Math.round((summary.vacant_potential_monthly / summary.occupied_estimated_monthly) * 100)}%</div>
+            <div className="muted small">{X.uplift}</div>
+          </div>
+          <div className="impact-time">
+            <div className="label">{X.timeLabel}</div>
+            <div className="big">{X.timeValue}</div>
+            <div className="muted small">{X.timeSub}</div>
+          </div>
+        </section>
+      )}
+
+      {showRevenue && summary.top_opportunities?.length > 0 && (
+        <section>
+          <div className="card-title"><h2>{X.sellFirst}</h2><span className="muted small">{X.sellFirstSub}</span></div>
+          <div className="grid g5">
+            {summary.top_opportunities.map((o, i) => (
+              <div key={o.spot_id} className="card station" onClick={() => go(`/spot/${o.spot_id}`)}>
+                <div className="row between"><span className="label">#{i + 1} · {o.spot_id}</span><span className={`tier ${o.tier}`}>{tx('tier', o.tier)}</span></div>
+                <h3 style={{ margin: '6px 0 2px' }}>{o.station_name}</h3>
+                <div className="muted tiny">{tx('type', o.spot_type)} · {tx('zone', o.zone)}</div>
+                <div className="big money" style={{ fontSize: 22, marginTop: 8 }}>{inr(o.monthly_price)}</div>
+                <div className="muted tiny">{t('dash.perMo')}</div>
+                {can('pitch.view') && <button className="btn sm cta" style={{ marginTop: 10 }} onClick={(e) => { e.stopPropagation(); go(`/pitch/${o.spot_id}`) }}>{X.pitchIt}</button>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {showStations && <section>
         <div className="card-title"><h2>{t('dash.stations')}</h2><span className="muted small">{t('dash.stationsHint')}</span></div>
         <div className="grid g5">
@@ -149,13 +195,14 @@ export default function Dashboard() {
             <table>
               <thead>
                 <tr>
-                  <th>{t('th.spot')}</th><th>{t('th.station')}</th><th>{t('th.type')}</th><th>{t('th.zone')}</th><th>{t('th.size')}</th><th>{t('th.tier')}</th>
+                  <th style={{ width: 28 }} title={X.compareHint}>⇄</th><th>{t('th.spot')}</th><th>{t('th.station')}</th><th>{t('th.type')}</th><th>{t('th.zone')}</th><th>{t('th.size')}</th><th>{t('th.tier')}</th>
                   <th className="num">{t('th.reach')}</th><th className="num">{t('th.perDay')}</th><th className="num">{t('th.monthly')}</th><th></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((s) => (
                   <tr key={s.spot_id} className="clickable" onClick={() => go(`/spot/${s.spot_id}`)}>
+                    <td onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={X.compareHint} checked={picked.includes(s.spot_id)} onChange={() => togglePick(s.spot_id)} /></td>
                     <td className="mono">{s.spot_id}</td>
                     <td>{s.station_name}<div className="muted tiny">{tx('stype', s.station_type)}</div></td>
                     <td>{tx('type', s.spot_type)}</td>
@@ -176,6 +223,15 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+      {picked.length > 0 && (
+        <div className="compare-bar">
+          <span><b>{picked.length}</b> {X.selected}: <span className="mono">{picked.join(', ')}</span></span>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn sm" onClick={() => setPicked([])}>{X.clear}</button>
+            <button className="btn sm cta" disabled={picked.length < 2} onClick={() => go(`/compare?ids=${picked.join(',')}`)}>{X.compare}</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -193,4 +249,10 @@ function Breakdown({ title, rows }) {
       ))}
     </div>
   )
+}
+
+const EXTRA = {
+  en: { today: 'Earning today', fromFilled: 'from {n} filled spots', withAll: 'With every spot filled', allSpots: 'all {n} spots at suggested prices', uplift: 'non-fare revenue uplift', timeLabel: 'Time to a priced pitch', timeValue: '< 1 min', timeSub: 'was days of manual work', sellFirst: 'Sell these first', sellFirstSub: 'Highest-value vacant spots right now', pitchIt: 'Get pitch →', compareHint: 'Select to compare', selected: 'selected', clear: 'Clear', compare: 'Compare →' },
+  hi: { today: 'आज की कमाई', fromFilled: '{n} भरी हुई जगहों से', withAll: 'सभी जगहें भरने पर', allSpots: 'सभी {n} जगहें सुझाई गई कीमत पर', uplift: 'नॉन-फ़ेयर आय में बढ़ोतरी', timeLabel: 'कीमत के साथ पिच बनाने का समय', timeValue: '< 1 मिनट', timeSub: 'पहले कई दिन लगते थे', sellFirst: 'पहले इन्हें बेचें', sellFirstSub: 'अभी सबसे ज़्यादा मूल्य वाली खाली जगहें', pitchIt: 'पिच देखें →', compareHint: 'तुलना के लिए चुनें', selected: 'चुनी गईं', clear: 'हटाएँ', compare: 'तुलना करें →' },
+  gu: { today: 'આજની કમાણી', fromFilled: '{n} ભરાયેલી જગ્યાઓથી', withAll: 'બધી જગ્યાઓ ભરાય ત્યારે', allSpots: 'બધી {n} જગ્યાઓ સૂચવેલી કિંમતે', uplift: 'નોન-ફેર આવકમાં વધારો', timeLabel: 'કિંમત સાથે પિચ બનાવવાનો સમય', timeValue: '< 1 મિનિટ', timeSub: 'પહેલાં ઘણા દિવસ લાગતા', sellFirst: 'પહેલાં આ વેચો', sellFirstSub: 'અત્યારે સૌથી વધુ મૂલ્યવાળી ખાલી જગ્યાઓ', pitchIt: 'પિચ જુઓ →', compareHint: 'સરખામણી માટે પસંદ કરો', selected: 'પસંદ', clear: 'હટાવો', compare: 'સરખામણી કરો →' },
 }
