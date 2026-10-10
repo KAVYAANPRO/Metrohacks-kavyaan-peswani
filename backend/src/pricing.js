@@ -96,6 +96,7 @@ function adPanel(spot, st, a) {
     monthly_impressions: round(monthlyImpr),
     daily_impressions: round(monthlyImpr / (a.weekday_days + a.weekend_days)),
     effective_cpm: Math.round(effectiveCpm * 100) / 100,
+    dayparts: dayparts(st, monthlyImpr, price),
     steps,
     assumptions_used: {
       base_cpm: a.base_cpm,
@@ -107,6 +108,53 @@ function adPanel(spot, st, a) {
       ...(eventImpr ? { event_days_per_month: a.event_days_per_month, event_footfall_multiplier: a.event_footfall_multiplier } : {}),
     },
   };
+}
+
+// Daypart slots from the station's weekday curve: morning/evening peaks use real peak windows when found.
+function dayparts(st, monthlyImpr, price) {
+  const curve = store.profiles.get(st.station_id)?.weekday || {};
+  const hours = Object.entries(curve).map(([h, v]) => [Number(h), v]);
+  const total = hours.reduce((s, [, v]) => s + v, 0);
+  if (!total || !price) return null;
+  const pw = st.peak_windows || [];
+  const am = pw.find((w) => w.start < 12) || { start: 7, end: 11 };
+  const pm = pw.find((w) => w.start >= 14 && w.start >= am.end) || { start: 17, end: 21 };
+  const amR = [am.start, am.end];
+  const pmR = [Math.max(pm.start, am.end), Math.max(pm.end, am.end)];
+  const ranges = {
+    morning: [amR],
+    midday: amR[1] < pmR[0] ? [[amR[1], pmR[0]]] : [],
+    evening: [pmR],
+    night: [[pmR[1], 24], [0, amR[0]]].filter(([s, e]) => e > s),
+  };
+  const inR = (h, rs) => rs.some(([s, e]) => h >= s && h < e);
+  const defs = [
+    { key: 'morning', name: 'Morning peak', peak: true },
+    { key: 'midday', name: 'Midday', peak: false },
+    { key: 'evening', name: 'Evening peak', peak: true },
+    { key: 'night', name: 'Night', peak: false },
+  ];
+  const label = (rs) => rs.map(([s, e]) => `${fmtHour(s)} – ${fmtHour(e)}`).join(', ');
+  const slots = defs
+    .filter((d) => ranges[d.key].length)
+    .map((d) => {
+      const share = hours.filter(([h]) => inR(h, ranges[d.key])).reduce((s, [, v]) => s + v, 0) / total;
+      return { ...d, hours: label(ranges[d.key]), share, raw: share * price * (d.peak ? 1.15 : 0.85) };
+    });
+  const rawSum = slots.reduce((s, x) => s + x.raw, 0) || 1;
+  const target = price * 1.05;
+  const out = slots.map(({ raw, share, ...d }) => {
+    const impr = share * monthlyImpr;
+    const slotPrice = round((raw / rawSum) * target, 100);
+    return {
+      ...d,
+      share: Math.round(share * 1000) / 1000,
+      monthly_impressions: round(impr),
+      monthly_price: slotPrice,
+      per_1000: impr ? Math.round((slotPrice / (impr / 1000)) * 100) / 100 : 0,
+    };
+  });
+  return { slots: out, total_slot_price: out.reduce((s, x) => s + x.monthly_price, 0), full_day_price: price, uplift: 0.05 };
 }
 
 function retail(spot, st, a) {

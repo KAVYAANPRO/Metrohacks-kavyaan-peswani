@@ -29,6 +29,15 @@ const sum = (req, s) => {
   return rest;
 };
 
+// ---------- sales pipeline ----------
+const STAGES = ['vacant', 'pitched', 'negotiating', 'booked'];
+const stageOf = (spot) => (spot && STAGES.includes(spot.stage) ? spot.stage : spot?.status === 'occupied' ? 'booked' : 'vacant');
+const withStage = (c) => {
+  if (!c) return c;
+  const sp = store.spots.get(c.spot_id);
+  return { ...c, stage: stageOf(sp), stage_updated_at: sp?.stage_updated_at || null, stage_by: sp?.stage_by || null, deal_note: sp?.deal_note || '', deal_value: sp?.deal_value ?? null };
+};
+
 // ---------- health ----------
 api.get('/health', wrap(async (_req, res) => {
   res.json({ ok: true, db: store.status(), llm: await llmStatus(), mail: { configured: mailConfigured() } });
@@ -162,20 +171,20 @@ api.get('/spots', perm('spots.view'), (req, res) => {
     const needle = String(q).toLowerCase();
     cards = cards.filter((c) => `${c.spot_id} ${c.station_name} ${c.spot_type} ${c.zone}`.toLowerCase().includes(needle));
   }
-  res.json(cards.map(({ steps, assumptions_used, peak_windows, ...rest }) => rest));
+  res.json(cards.map(({ steps, assumptions_used, peak_windows, ...rest }) => withStage(rest)));
 });
 
 api.get('/spots/:id', perm('spots.view'), (req, res) => {
   const c = rateCard(req.params.id);
   if (!c) return notFound(res, 'spot');
-  res.json(c);
+  res.json(withStage(c));
 });
 
 api.get('/spots/:id/ratecard', perm('ratecard.view'), (req, res) => {
   const c = rateCard(req.params.id);
   if (!c) return notFound(res, 'spot');
   const station = stationStats(c.station_id);
-  res.json({ ...c, audience: station.audience, assumptions: store.assumptions, labels: ASSUMPTION_LABELS });
+  res.json({ ...withStage(c), audience: station.audience, assumptions: store.assumptions, labels: ASSUMPTION_LABELS });
 });
 
 api.patch('/spots/:id/status', perm('spots.status'), wrap(async (req, res) => {
@@ -183,8 +192,39 @@ api.patch('/spots/:id/status', perm('spots.status'), wrap(async (req, res) => {
   const { status } = req.body || {};
   if (!['vacant', 'occupied'].includes(status)) return res.status(400).json({ error: 'status must be vacant or occupied' });
   await store.updateSpotStatus(req.params.id, status);
-  res.json({ spot: rateCard(req.params.id), summary: sum(req, summary()) });
+  // Keep the pipeline stage consistent with a manual status flip.
+  const sp = store.spots.get(req.params.id);
+  if (status === 'occupied' && stageOf(sp) !== 'booked') await store.updateSpotStage(req.params.id, { stage: 'booked', by: req.user?.username || null });
+  else if (status === 'vacant' && stageOf(sp) === 'booked') await store.updateSpotStage(req.params.id, { stage: 'vacant', by: req.user?.username || null });
+  res.json({ spot: withStage(rateCard(req.params.id)), summary: sum(req, summary()) });
 }));
+
+api.patch('/spots/:id/stage', perm('spots.status'), wrap(async (req, res) => {
+  if (!store.spots.has(req.params.id)) return notFound(res, 'spot');
+  const { stage, note, value } = req.body || {};
+  if (!STAGES.includes(stage)) return res.status(400).json({ error: `stage must be one of ${STAGES.join(', ')}` });
+  if (value !== undefined && value !== null && (typeof value !== 'number' || !Number.isFinite(value) || value < 0)) {
+    return res.status(400).json({ error: 'value must be a non-negative number' });
+  }
+  await store.updateSpotStage(req.params.id, {
+    stage,
+    by: req.user?.username || null,
+    note: note === undefined ? undefined : String(note || '').slice(0, 500),
+    value: value === undefined ? undefined : value,
+  });
+  res.json({ spot: withStage(rateCard(req.params.id)), summary: sum(req, summary()) });
+}));
+
+api.get('/pipeline', perm('spots.view'), (_req, res) => {
+  res.json(allRateCards().map((c) => {
+    const w = withStage(c);
+    return {
+      spot_id: w.spot_id, station_name: w.station_name, spot_type: w.spot_type, zone: w.zone, tier: w.tier,
+      monthly_price: w.monthly_price, stage: w.stage, stage_updated_at: w.stage_updated_at, stage_by: w.stage_by,
+      deal_note: w.deal_note, deal_value: w.deal_value,
+    };
+  }));
+});
 
 // Side-by-side comparison of two or more spots: /compare?ids=SP001,SP004
 api.get('/compare', perm('spots.view'), (req, res) => {
@@ -200,7 +240,7 @@ api.get('/compare', perm('spots.view'), (req, res) => {
 const LANGS = ['en', 'hi', 'gu'];
 const lang = (l) => (LANGS.includes(l) ? l : 'en');
 
-async function makePitch(spotId, { category = '', force = false, language = 'en' } = {}) {
+async function makePitch(spotId, { category = '', force = false, language = 'en', by = null } = {}) {
   const card = rateCard(spotId);
   if (!card) return null;
   const cached = store.getPitch(spotId, category, language);
@@ -209,6 +249,7 @@ async function makePitch(spotId, { category = '', force = false, language = 'en'
   if (cached && !force && !upgradeTemplate && cached.priced_at === card.monthly_price) return { ...cached, cached: true };
   const pitch = await generatePitch(card, stationStats(card.station_id), { category, language });
   const saved = await store.savePitch(pitch);
+  if (stageOf(store.spots.get(spotId)) === 'vacant') await store.updateSpotStage(spotId, { stage: 'pitched', by: by || null });
   return { ...saved, cached: false };
 }
 
@@ -234,7 +275,7 @@ api.get('/pitches', perm('pitch.view'), (_req, res) => {
 
 api.post('/spots/:id/pitch', perm('pitch.generate'), wrap(async (req, res) => {
   const { category = '', force = false, language } = req.body || {};
-  const p = await makePitch(req.params.id, { category: String(category).slice(0, 80), force: Boolean(force), language: lang(language) });
+  const p = await makePitch(req.params.id, { category: String(category).slice(0, 80), force: Boolean(force), language: lang(language), by: req.user?.username });
   if (!p) return notFound(res, 'spot');
   res.json({ ...p, ratecard: rateCard(req.params.id) });
 }));

@@ -98,6 +98,8 @@ export default function SpotDetail({ id }) {
             <p className="small" style={{ marginBottom: 0 }}><b>{t('spot.justification')}</b> {card.justification}</p>
           </div>
 
+          {card.dayparts?.slots?.length > 0 && <Dayparts dp={card.dayparts} lang={lang} />}
+
           {canChart && <div className="card">
             <div className="card-title">
               <h2>{t('spot.hourly', { station: card.station_name })}</h2>
@@ -147,6 +149,57 @@ function Stat({ label, value, sub, strong, flash }) {
       <div className="label">{label}</div>
       <div className="big" style={{ transition: 'opacity .2s', opacity: flash ? 0.4 : 1 }}>{value}</div>
       <div className="small muted">{sub}</div>
+    </div>
+  )
+}
+
+const L = {
+  en: {
+    title: 'Sell by time slot', peak: 'Peak', slot: 'Slot', share: 'Share of riders', impr: 'Impressions / mo', price: 'Price / mo',
+    cpm: 'per 1,000', names: { morning: 'Morning peak', midday: 'Midday', evening: 'Evening peak', night: 'Night' },
+    footer: (x, y) => <>Selling slots separately: <b className="money">{x}</b>/month (+5%) vs <b>{y}</b> full-day</>,
+  },
+  hi: {
+    title: 'समय स्लॉट के हिसाब से बेचें', peak: 'पीक', slot: 'स्लॉट', share: 'यात्रियों का हिस्सा', impr: 'इम्प्रेशन / माह', price: 'कीमत / माह',
+    cpm: 'प्रति 1,000', names: { morning: 'सुबह का पीक', midday: 'दोपहर', evening: 'शाम का पीक', night: 'रात' },
+    footer: (x, y) => <>स्लॉट अलग-अलग बेचने पर: <b className="money">{x}</b>/माह (+5%), जबकि पूरे दिन का <b>{y}</b></>,
+  },
+  gu: {
+    title: 'સમય સ્લોટ મુજબ વેચો', peak: 'પીક', slot: 'સ્લોટ', share: 'મુસાફરોનો હિસ્સો', impr: 'ઇમ્પ્રેશન / મહિનો', price: 'કિંમત / મહિનો',
+    cpm: 'દર 1,000', names: { morning: 'સવારનો પીક', midday: 'બપોર', evening: 'સાંજનો પીક', night: 'રાત' },
+    footer: (x, y) => <>સ્લોટ અલગ-અલગ વેચવાથી: <b className="money">{x}</b>/મહિનો (+5%), જ્યારે આખા દિવસનું <b>{y}</b></>,
+  },
+}
+
+function Dayparts({ dp, lang }) {
+  const l = L[lang] || L.en
+  const maxShare = Math.max(...dp.slots.map((s) => s.share)) || 1
+  return (
+    <div className="card">
+      <div className="card-title">
+        <h2>{l.title}</h2>
+        <span className="badge">+5%</span>
+      </div>
+      <div className="stack" style={{ gap: 12 }}>
+        {dp.slots.map((s) => (
+          <div key={s.key} style={s.peak ? { borderLeft: '3px solid var(--orange)', paddingLeft: 10 } : { paddingLeft: 13 }}>
+            <div className="row between small">
+              <span>
+                <b>{l.names[s.key] || s.name}</b>{' '}
+                {s.peak && <span className="badge hot">{l.peak}</span>}{' '}
+                <span className="muted">{s.hours}</span>
+              </span>
+              <b className="money">{inr(s.monthly_price)}</b>
+            </div>
+            <div className="bar"><div style={{ width: `${(s.share / maxShare) * 100}%`, ...(s.peak ? { background: 'var(--orange)' } : {}) }} /></div>
+            <div className="row between small muted">
+              <span>{l.share}: {pct(s.share)} · {l.impr}: {num(s.monthly_impressions)}</span>
+              <span>{inr(s.per_1000)} {l.cpm}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="small" style={{ marginBottom: 0, marginTop: 12 }}>{l.footer(inr(dp.total_slot_price), inr(dp.full_day_price))}</p>
     </div>
   )
 }

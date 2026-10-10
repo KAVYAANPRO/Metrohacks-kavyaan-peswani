@@ -224,6 +224,16 @@ class Store {
     return spot;
   }
 
+  async updateSpotStage(spotId, { stage, by = null, note, value } = {}) {
+    const spot = this.spots.get(spotId);
+    const set = { stage, stage_updated_at: new Date().toISOString(), stage_by: by, status: stage === 'booked' ? 'occupied' : 'vacant' };
+    if (note !== undefined) set.deal_note = note;
+    if (value !== undefined) set.deal_value = value;
+    Object.assign(spot, set);
+    await this.persist('spot', () => this.db.collection('spots').updateOne({ _id: spotId }, { $set: set }));
+    return spot;
+  }
+
   async persist(what, fn) {
     if (!this.mongoOk) return;
     try {

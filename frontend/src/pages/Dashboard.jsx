@@ -24,6 +24,9 @@ export default function Dashboard() {
   const [picked, setPicked] = useState([])
   const togglePick = (id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id].slice(-3)))
   const X = EXTRA[lang] || EXTRA.en
+  const [vacantAll, setVacantAll] = useState([])
+  const [fillN, setFillN] = useState(5)
+  useEffect(() => { api.spots({ status: 'vacant' }).then(setVacantAll).catch(() => {}) }, [])
 
   useEffect(() => {
     Promise.all([showRevenue ? api.summary() : null, showStations ? api.stations() : []])
@@ -121,6 +124,41 @@ export default function Dashboard() {
           </div>
         </section>
       )}
+
+      {showRevenue && vacantAll.length > 0 && summary.occupied_estimated_monthly > 0 && (() => {
+        const n = Math.min(fillN, vacantAll.length)
+        const gain = vacantAll.slice(0, n).reduce((t, c) => t + c.monthly_price, 0)
+        const base = summary.occupied_estimated_monthly
+        const share = summary.ppp?.partner_share ?? 0.15
+        return (
+          <section className="card whatif">
+            <div className="whatif-head">
+              <div>
+                <div className="label">{X.wiLabel}</div>
+                <h2 style={{ marginTop: 4 }}>{X.wiTitle.replace('{n}', n)}</h2>
+              </div>
+              <div className="whatif-slider">
+                <input type="range" min={1} max={vacantAll.length} value={n} onChange={(e) => setFillN(Number(e.target.value))} aria-label={X.wiLabel} />
+                <div className="row between tiny muted"><span>1</span><span>{vacantAll.length}</span></div>
+              </div>
+            </div>
+            <div className="grid g4" style={{ marginTop: 14 }}>
+              <div><div className="label">{X.wiMonthly}</div><div className="big money">+{lakh(gain)}</div></div>
+              <div><div className="label">{X.wiAnnual}</div><div className="big">+{lakh(gain * 12)}</div></div>
+              <div><div className="label">{X.wiUplift}</div><div className="big money">+{Math.round((gain / base) * 100)}%</div></div>
+              <div><div className="label">{X.wiMetro}</div><div className="big">{lakh(gain * (1 - share))}</div><div className="muted tiny">{X.wiAfter.replace('{p}', Math.round(share * 100))}</div></div>
+            </div>
+            <div className="whatif-bar" aria-hidden="true">
+              <div style={{ width: `${(base / (base + summary.vacant_potential_monthly)) * 100}%` }} className="wb-base" />
+              <div style={{ width: `${(gain / (base + summary.vacant_potential_monthly)) * 100}%` }} className="wb-gain" />
+            </div>
+            <div className="row tiny muted" style={{ gap: 16, marginTop: 6 }}>
+              <span><span className="wb-dot wb-base" /> {X.wiToday}</span>
+              <span><span className="wb-dot wb-gain" /> {X.wiAdded.replace('{n}', n)}</span>
+            </div>
+          </section>
+        )
+      })()}
 
       {showRevenue && summary.top_opportunities?.length > 0 && (
         <section>
@@ -252,7 +290,7 @@ function Breakdown({ title, rows }) {
 }
 
 const EXTRA = {
-  en: { today: 'Earning today', fromFilled: 'from {n} filled spots', withAll: 'With every spot filled', allSpots: 'all {n} spots at suggested prices', uplift: 'non-fare revenue uplift', timeLabel: 'Time to a priced pitch', timeValue: '< 1 min', timeSub: 'was days of manual work', sellFirst: 'Sell these first', sellFirstSub: 'Highest-value vacant spots right now', pitchIt: 'Get pitch →', compareHint: 'Select to compare', selected: 'selected', clear: 'Clear', compare: 'Compare →' },
-  hi: { today: 'आज की कमाई', fromFilled: '{n} भरी हुई जगहों से', withAll: 'सभी जगहें भरने पर', allSpots: 'सभी {n} जगहें सुझाई गई कीमत पर', uplift: 'नॉन-फ़ेयर आय में बढ़ोतरी', timeLabel: 'कीमत के साथ पिच बनाने का समय', timeValue: '< 1 मिनट', timeSub: 'पहले कई दिन लगते थे', sellFirst: 'पहले इन्हें बेचें', sellFirstSub: 'अभी सबसे ज़्यादा मूल्य वाली खाली जगहें', pitchIt: 'पिच देखें →', compareHint: 'तुलना के लिए चुनें', selected: 'चुनी गईं', clear: 'हटाएँ', compare: 'तुलना करें →' },
-  gu: { today: 'આજની કમાણી', fromFilled: '{n} ભરાયેલી જગ્યાઓથી', withAll: 'બધી જગ્યાઓ ભરાય ત્યારે', allSpots: 'બધી {n} જગ્યાઓ સૂચવેલી કિંમતે', uplift: 'નોન-ફેર આવકમાં વધારો', timeLabel: 'કિંમત સાથે પિચ બનાવવાનો સમય', timeValue: '< 1 મિનિટ', timeSub: 'પહેલાં ઘણા દિવસ લાગતા', sellFirst: 'પહેલાં આ વેચો', sellFirstSub: 'અત્યારે સૌથી વધુ મૂલ્યવાળી ખાલી જગ્યાઓ', pitchIt: 'પિચ જુઓ →', compareHint: 'સરખામણી માટે પસંદ કરો', selected: 'પસંદ', clear: 'હટાવો', compare: 'સરખામણી કરો →' },
+  en: { today: 'Earning today', fromFilled: 'from {n} filled spots', withAll: 'With every spot filled', allSpots: 'all {n} spots at suggested prices', uplift: 'non-fare revenue uplift', timeLabel: 'Time to a priced pitch', timeValue: '< 1 min', timeSub: 'was days of manual work', sellFirst: 'Sell these first', sellFirstSub: 'Highest-value vacant spots right now', pitchIt: 'Get pitch →', compareHint: 'Select to compare', selected: 'selected', clear: 'Clear', compare: 'Compare →', wiLabel: 'What-if simulator', wiTitle: 'Fill the top {n} vacant spots', wiMonthly: 'Extra revenue / month', wiAnnual: 'Extra revenue / year', wiUplift: 'Uplift on today', wiMetro: 'Metro keeps / month', wiAfter: 'after {p}% PPP partner share', wiToday: 'Earning today', wiAdded: 'Added by filling top {n}' },
+  hi: { today: 'आज की कमाई', fromFilled: '{n} भरी हुई जगहों से', withAll: 'सभी जगहें भरने पर', allSpots: 'सभी {n} जगहें सुझाई गई कीमत पर', uplift: 'नॉन-फ़ेयर आय में बढ़ोतरी', timeLabel: 'कीमत के साथ पिच बनाने का समय', timeValue: '< 1 मिनट', timeSub: 'पहले कई दिन लगते थे', sellFirst: 'पहले इन्हें बेचें', sellFirstSub: 'अभी सबसे ज़्यादा मूल्य वाली खाली जगहें', pitchIt: 'पिच देखें →', compareHint: 'तुलना के लिए चुनें', selected: 'चुनी गईं', clear: 'हटाएँ', compare: 'तुलना करें →', wiLabel: 'क्या-अगर सिम्युलेटर', wiTitle: 'सबसे ऊपर की {n} खाली जगहें भरें', wiMonthly: 'अतिरिक्त आय / माह', wiAnnual: 'अतिरिक्त आय / वर्ष', wiUplift: 'आज से बढ़ोतरी', wiMetro: 'मेट्रो को मिलेगा / माह', wiAfter: '{p}% PPP पार्टनर हिस्से के बाद', wiToday: 'आज की कमाई', wiAdded: 'ऊपर की {n} जगहें भरने से' },
+  gu: { today: 'આજની કમાણી', fromFilled: '{n} ભરાયેલી જગ્યાઓથી', withAll: 'બધી જગ્યાઓ ભરાય ત્યારે', allSpots: 'બધી {n} જગ્યાઓ સૂચવેલી કિંમતે', uplift: 'નોન-ફેર આવકમાં વધારો', timeLabel: 'કિંમત સાથે પિચ બનાવવાનો સમય', timeValue: '< 1 મિનિટ', timeSub: 'પહેલાં ઘણા દિવસ લાગતા', sellFirst: 'પહેલાં આ વેચો', sellFirstSub: 'અત્યારે સૌથી વધુ મૂલ્યવાળી ખાલી જગ્યાઓ', pitchIt: 'પિચ જુઓ →', compareHint: 'સરખામણી માટે પસંદ કરો', selected: 'પસંદ', clear: 'હટાવો', compare: 'સરખામણી કરો →', wiLabel: 'જો-તો સિમ્યુલેટર', wiTitle: 'ટોચની {n} ખાલી જગ્યાઓ ભરો', wiMonthly: 'વધારાની આવક / મહિનો', wiAnnual: 'વધારાની આવક / વર્ષ', wiUplift: 'આજ કરતાં વધારો', wiMetro: 'મેટ્રોને મળશે / મહિનો', wiAfter: '{p}% PPP ભાગીદાર હિસ્સા પછી', wiToday: 'આજની કમાણી', wiAdded: 'ટોચની {n} જગ્યાઓ ભરવાથી' },
 }
